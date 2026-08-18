@@ -42,12 +42,10 @@ def generate_traffic_data(n_samples: int = 1000, random_seed: int = 42) -> pd.Da
 
     return df
 
-if __name__ == "__main__":
-    data = generate_traffic_data()
-
+def detect_anomalies(data: pd.DataFrame) -> pd.DataFrame:
     data["CR"] = np.where(data["clicks"] > 0, (data["leads"] / data["clicks"] * 100), 0)
-    data["CPL"] = np.where(data["leads"] > 0 , (data["cost"] / data["leads"]), 0)
-    data["ROI"] = (data["revenue"] - data["cost"]) / data["cost"] * 100
+    data["CPL"] = np.where(data["leads"] > 0, (data["cost"] / data["leads"]), 0)
+    data["ROI"] = np.where(data["cost"] > 0, ((data["revenue"] - data["cost"]) / data["cost"]) * 100, 0)
 
     data_to_model = data.drop(columns=["campaign_id"])
 
@@ -55,5 +53,13 @@ if __name__ == "__main__":
     data["anomaly"] = model.fit_predict(data_to_model)
 
     anomalies = data[data["anomaly"] == -1]
-    print(f"Anomalies found: {len(anomalies)}")
-    print(anomalies[["campaign_id", "clicks", "leads", "revenue", "cost", "CR", "ROI"]].head(10))
+
+    return anomalies
+
+if __name__ == "__main__":
+    data_test = generate_traffic_data()
+
+    anomalies_test = detect_anomalies(data_test)
+
+    print(f"Anomalies found: {len(anomalies_test)}")
+    print(anomalies_test[["campaign_id", "clicks", "leads", "revenue", "cost", "CR", "ROI"]].head(10))
