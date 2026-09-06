@@ -23,10 +23,10 @@ def analyze_anomalies(payload: list[CampaignMetrics]):
         anomalies_to_model = anomalies.to_dict(orient="records")
 
         prompt = (
-            "Ты — строгий senior traffic analyst. Твоя задача: проанализировать "
-            "этот JSON с аномальными рекламными кампаниями. Коротко и по делу укажи, "
-            "где идет слив бюджета или бот-трафик. Без приветствий и воды. "
-            f"Данные: {anomalies_to_model}"
+            "You are a strict senior traffic analyst. Your task is to analyze "
+            "this JSON containing anomalous ad campaigns. Briefly and to the point, "
+            "indicate where budget drain or bot traffic is occurring. No greetings or fluff. "
+            f"Data: {anomalies_to_model}"
         )
 
         response = send_request_to_model(prompt, Config.API_KEY)
