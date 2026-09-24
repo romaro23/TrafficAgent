@@ -1,27 +1,21 @@
 import pandas as pd
-from fastapi import FastAPI
-from pydantic import BaseModel
-from core_ml import detect_anomalies
-from model_access import send_request_to_model
-from config import Config
-from rag_db import AnomaliesMemory
+from fastapi import APIRouter
+from app.schemas.metrics import CampaignMetrics, AnalyzeResponse
+from app.ml.core_ml import detect_anomalies
+from app.services.llm import send_request_to_model
+from app.config import Config
+from app.services.rag_db import AnomaliesMemory
 
-class CampaignMetrics(BaseModel):
-    campaign_id: str
-    clicks: int
-    cost: float
-    leads: int
-    revenue: float
+router = APIRouter()
 
-app = FastAPI()
 memory = AnomaliesMemory()
 
-@app.get("/memory")
+@router.get("/memory", summary="Show all anomalies from the database")
 def view_memory():
     data = memory.get_all_memory()
     return data
 
-@app.post("/analyze")
+@router.post("/analyze", summary="Analysis of traffic", response_model=AnalyzeResponse)
 def analyze_anomalies(payload: list[CampaignMetrics]):
     df = pd.DataFrame([item.model_dump() for item in payload])
     anomalies = detect_anomalies(df)

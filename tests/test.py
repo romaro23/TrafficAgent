@@ -1,7 +1,7 @@
 import json
 import requests
 
-from core_ml import generate_traffic_data
+from app.ml.core_ml import generate_traffic_data
 
 # Generate test data
 print("Generating test traffic...")
@@ -13,7 +13,7 @@ print("-" * 50)
 
 # Send request
 try:
-    response = requests.post("http://127.0.0.1:8000/analyze", json=payload)
+    response = requests.post("http://127.0.0.1:8000/api/analyze", json=payload)
     response.raise_for_status()
 
     result = response.json()
