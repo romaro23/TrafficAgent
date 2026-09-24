@@ -3,7 +3,6 @@ import requests
 
 from app.ml.core_ml import generate_traffic_data
 
-# Generate test data
 print("Generating test traffic...")
 df = generate_traffic_data(n_samples=50)
 payload = df.to_dict(orient="records")
@@ -11,7 +10,6 @@ payload = df.to_dict(orient="records")
 print(f"Sending {len(payload)} records for analysis...\n")
 print("-" * 50)
 
-# Send request
 try:
     response = requests.post("http://127.0.0.1:8000/api/analyze", json=payload)
     response.raise_for_status()
@@ -33,6 +31,6 @@ try:
 
 except requests.exceptions.ConnectionError:
     print("Error: Failed to connect to the server.")
-    print("Ensure the server is running (e.g. uvicorn main:app --reload).")
+    print("Ensure the server is running (e.g. uvicorn app.main:app --reload).")
 except Exception as e:
     print(f"Error: {e}")

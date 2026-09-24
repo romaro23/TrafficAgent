@@ -6,7 +6,7 @@ An AI-integrated backend microservice designed to automatically detect fraudulen
 In performance marketing and traffic arbitrage, late reaction to bot traffic or overspending can drain budgets in hours. This service processes synthetic campaign metrics (clicks, leads, revenue, cost) and flags statistical outliers. It then leverages LLM to generate clear, business-readable alerts for media buyers, learning from historical occurrences to detect recurring patterns.
 
 ## 🛠️ Tech Stack
-* **Backend:** FastAPI, Python, Pydantic
+* **Backend:** FastAPI, Python, Pydantic (Fully Asynchronous)
 * **Machine Learning:** Scikit-Learn (`IsolationForest`), Pandas, NumPy
 * **Vector Database (Memory):** ChromaDB 
 * **AI Integration:** Google Gemini API (Prompt Engineering & RAG context building)
@@ -15,24 +15,33 @@ In performance marketing and traffic arbitrage, late reaction to bot traffic or 
 ## 🏗️ Project Structure
 The project follows a standard modular architecture suitable for production AI/ML applications:
 ```text
-app/
-├── api/          # API Routers and Endpoints
-├── ml/           # Machine Learning logic (IsolationForest models)
-├── schemas/      # Pydantic data validation schemas
-├── services/     # External integrations (LLM API, ChromaDB)
-└── main.py       # FastAPI application entry point
+.
+├── app/
+│   ├── api/
+│   │   └── routes.py     # API Endpoints (e.g. /api/analyze)
+│   ├── ml/
+│   │   └── core_ml.py    # Machine Learning logic (IsolationForest models)
+│   ├── schemas/
+│   │   └── metrics.py    # Pydantic data validation schemas
+│   ├── services/
+│   │   ├── llm.py        # Async Google Gemini API integration
+│   │   └── rag_db.py     # ChromaDB contextual memory logic
+│   ├── config.py         # Application configuration and secrets
+│   └── main.py           # FastAPI application entry point
+└── tests/
+    └── test.py           # Test scripts and API validations
 ```
 
 ## ⚙️ How It Works
 1. **Data Ingestion:** Receives campaign data via POST request (`/api/analyze`).
 2. **Anomaly Detection:** `IsolationForest` scans the dataset for anomalies (e.g., high cost with zero conversions).
 3. **Retrieval-Augmented Memory (RAG):** Checks ChromaDB for similar past anomalies (historical context) and attaches them to the new data. Every new anomaly is automatically saved back to the database.
-4. **AI Evaluation:** Anomalous rows, along with historical context, are sent to the Gemini API with a strict system prompt to evaluate the severity and provide a verdict.
+4. **AI Evaluation (Async):** Anomalous rows, along with historical context, are sent *asynchronously* to the Gemini API with a strict system prompt to evaluate the severity and provide a verdict without blocking the event loop.
 5. **Response:** Returns a structured JSON containing raw data and the AI analyst's verdict.
 
 ## 🔌 API Endpoints
-- **POST `/api/v1/analyze`**: Analyzes an array of campaign metrics for anomalies.
-- **GET `/api/v1/memory`**: Returns all historical anomaly records stored in ChromaDB.
+- **POST `/api/analyze`**: Analyzes an array of campaign metrics for anomalies.
+- **GET `/api/memory`**: Returns all historical anomaly records stored in ChromaDB.
 
 ## 🚀 Quick Start
 
@@ -52,7 +61,7 @@ app/
    ```bash
    uvicorn app.main:app --reload
    ```
-5. **Run the Test Script:** In a separate terminal, test the flow with randomly generated traffic data:
+5. **Run the Test Script:** In a separate terminal, test the flow with randomly generated traffic data (ensure you run this from the project root):
    ```bash
    python tests/test.py
    ```

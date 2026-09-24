@@ -16,7 +16,7 @@ def view_memory():
     return data
 
 @router.post("/analyze", summary="Analysis of traffic", response_model=AnalyzeResponse)
-def analyze_anomalies(payload: list[CampaignMetrics]):
+async def analyze_anomalies(payload: list[CampaignMetrics]):
     df = pd.DataFrame([item.model_dump() for item in payload])
     anomalies = detect_anomalies(df)
 
@@ -48,7 +48,7 @@ def analyze_anomalies(payload: list[CampaignMetrics]):
             "Use the Historical Context to determine if this is a recurring issue or a new spike. Provide your final verdict."
         )
 
-        response = send_request_to_model(prompt, Config.API_KEY)
+        response = await send_request_to_model(prompt, Config.API_KEY)
 
         return {
             "status": "anomalies_detected",
